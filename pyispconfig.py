@@ -817,3 +817,20 @@ class PyISPconfig(object):
             return response
         else:
             return {"error": True, "type": "string", "detail": "Mail domain doesn't exist."}
+
+    def mail_user_get(self, params=None):
+        """
+        Returns mail user information by its group id.
+
+        Param:
+            param -- Dictionary containing mail user information.
+
+        Output:
+            Return a Dictionary with key/values with the mail mail parameter's values.
+        """
+
+        response = self._call("mail_user_get", params)
+        if response:
+            return response
+        else:
+            return {"error": True, "type": "string", "detail": "Mail user doesn't exist."}
