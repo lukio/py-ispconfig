@@ -204,7 +204,7 @@ class PyISPconfig(object):
             return self.check_response(response, dict, "Error during 'client_get' method")
         else:
             self.error = {"error": True, "type": "string", "detail": "Client ID %s doesn't exist" % id}
-            return False
+            return self.error
 
     def client_add(self, params=None, reseller_id=0):
         """
@@ -319,7 +319,7 @@ class PyISPconfig(object):
             return self.check_response(response, dict, "Error during 'client_get_by_username' method")
         else:
             self.error = {"error": True, "type": "string", "detail": "Client username %s doesn't exist" % username}
-            return False
+            return self.error
 
     def client_change_password(self, id, password):
         """
@@ -757,3 +757,63 @@ class PyISPconfig(object):
         else:
             self.error = {"error": True, "type": "string", "detail": "Problem during deleting A record ID %s" % id}
             return False
+
+    def domains_get_all_by_user(self, group_id):
+        """
+        Returns information about the databases of the system user.
+
+        Param:
+            client_id -- Client's id
+            group_id -- Group's id
+
+        Output:
+            Return a list of Dictionaries with key/values with domain's values.
+        """
+
+        #response = self._call("domains_get_all_by_user", (client_id, group_id))
+        response = self.array_to_dict_response(self._call("domains_get_all_by_user", group_id))
+        if not response:
+            self.error = {"error": True, "type": "string", "detail": "No domain for client ID %s" % client_id}
+            return self.error
+        else:
+            list = []
+            if isinstance(response, typedArrayType):
+                for answer in response:
+                    list.append(self.array_to_dict_response(answer))
+            #Check response
+            return self.check_response(list, type(list), "Error during 'domains_get_all_by_user' method")
+
+    def client_get_groupid(self, client_id):
+        """
+        Return the group id by client
+
+        Param:
+            client_id - Client's ID
+
+        Output:
+            Returns the ID of the group
+        """
+
+        response = self._call("client_get_groupid", client_id)
+        if response:
+            return response
+        else:
+            self.error = {"error": True, "type": "string", "detail": "There is no group for this client ID: %s" % client_id}
+            return False
+
+    def mail_domain_get(self, params=None):
+        """
+        Returns mail domain information by its group id.
+
+        Param:
+            param -- Dictionary containing mail domain information.
+
+        Output:
+            Return a Dictionary with key/values with the mail domain parameter's values.
+        """
+
+        response = self._call("mail_domain_get", params)
+        if response:
+            return response
+        else:
+            return {"error": True, "type": "string", "detail": "Mail domain doesn't exist."}
