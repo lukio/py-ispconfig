@@ -304,7 +304,7 @@ class PyISPconfig(object):
         """
         response = self._call("client_get_id", id)
         if response:
-            return self.check_response(response, dict, "Error during 'client_get_id' method")
+            return response
         else:
             self.error = {"error": True, "type": "string", "detail": "client ID of the system user %s doesn't exist" % id}
             return False
