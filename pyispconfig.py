@@ -1,5 +1,5 @@
 """
-################################################################################
+# ###############################################################################
 #
 # PyISPconfig - Benjamin Bouvier (benjamin.bouvier29@gmail.com)
 #
@@ -35,7 +35,8 @@
 ################################################################################
 """
 import random
-from SOAPpy import SOAP
+from SOAPpy import SOAPProxy
+from SOAPpy import Types
 from SOAPpy import *
 
 
@@ -93,7 +94,7 @@ class PyISPconfig(object):
         try:
             #Invoke asked method on the server
             response = self.server.invoke(method, args=params)
-        except SOAP.faultType as e:
+        except faultType as e:
             self.error = {"error": True, "type": "faultType", "detail": e.faultstring}
             return False
         else:
@@ -129,7 +130,7 @@ class PyISPconfig(object):
 
         """
         dictionary = {}
-        rs = SOAP.simplify(params)
+        rs = simplify(params)
 
         if isinstance(rs, list):
             for test in rs:
@@ -184,6 +185,12 @@ class PyISPconfig(object):
         for k, v in dict.iteritems():
             list.append((k, v))
         return list
+
+    def tuple_to_array(self, list_of_tuples):
+        from collections import OrderedDict
+        my_dict = OrderedDict(list_of_tuples)
+        for key, value in my_dict.iteritems():
+            print '%s = %s' % (key, value)
 
 #
 # Actions on Client
@@ -811,7 +818,6 @@ class PyISPconfig(object):
         Output:
             Return a Dictionary with key/values with the mail domain parameter's values.
         """
-
         response = self._call("mail_domain_get", params)
         if response:
             return response
@@ -834,3 +840,52 @@ class PyISPconfig(object):
             return response
         else:
             return {"error": True, "type": "string", "detail": "Mail user doesn't exist."}
+
+    def mail_user_set(self, client_id, mailuser_id, params=None):
+        """
+        Returns mail user information by its group id.
+
+        Param:
+            param -- Dictionary containing mail user information.
+
+        Output:
+            Return a Dictionary with key/values with the mail mail parameter's values.
+        """
+        default = {
+            'disableimap': 'n',
+            'disablepop3': 'n',
+            'disabledeliver': 'n',
+            'disablesmtp': 'n',
+        }
+
+        ##Update default params
+        #import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+        params = {}
+        params['disableimap'] = 'y'
+        default = self.update_default_dict(default, params)
+
+        ##SOAPRequest
+        default = self.dict_to_tuple(default)
+
+        response = self._call("mail_user_update_pythonic", (client_id, mailuser_id, default))
+        return response
+        #if response:
+        #    return response
+        #else:
+        #    return {"error": True, "type": "string", "detail": "Mail user doesn't exist."}
+
+    def sites_web_domain_get(self, params=None):
+        """
+        Returns web domains information by its group id.
+
+        Param:
+            param -- Dictionary containing mail domain information.
+
+        Output:
+            Return a Dictionary with key/values with the mail domain parameter's values.
+        """
+        response = self._call("sites_web_domain_get", params)
+        if response:
+            return response
+        else:
+            return {"error": True, "type": "string", "detail": "web domain doesn't exist."}
